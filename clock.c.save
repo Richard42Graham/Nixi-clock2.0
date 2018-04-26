@@ -1,0 +1,366 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <wiringPi.h>
+#include <time.h>
+#include <sys/time.h>
+#include <math.h>
+#include <python2.7/Python.h>
+#include <unistd.h>
+#include <string.h>
+
+// hours
+char hoursBits[2][10] = {{0x08, 0x00, 0x09, 0x01, 0x0E, 0x06, 0x0A, 0x02, 0x0C, 0x04}, {0x08, 0x00, 0x09, 0x01, 0x0E, 0x06, 0x0A, 0x02, 0x0C, 0x04}};
+//Mins
+char minitsBits[2][10] = {{0x01, 0x00, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02},{0x02, 0x09, 0x00, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x01}};
+//Sec
+char secondsBits[2][10] = {{0x08, 0x00, 0x02, 0x01, 0x04, 0x06, 0x0a, 0x09, 0x0c, 0x0e},{0x01, 0x00, 0x04, 0x08, 0x02, 0x06, 0x05, 0x09, 0x03, 0x07}};
+//MSec
+char miliseconds[2][10] = {{0x01, 0x00, 0x04, 0x08, 0x02, 0x06, 0x05, 0x09, 0x08, 0x07}, {0x01, 0x00, 0x04, 0x08, 0x02, 0x06, 0x05, 0x09, 0x08, 0x07}};
+
+char caculateTime(int number, char map[2][10]);
+
+int main( int argc, char *argv[] ){
+
+	struct tm *tm_p;
+
+	time_t current_time;
+	struct timeval tv;
+	int millisec, usePM, displayWeb;
+	int opt, neon;
+	char prevSec;
+
+	int fd = wiringPiI2CSetup(0x20);	// first chip
+	int bd = wiringPiI2CSetup(0x21);	// Second Chip
+
+	int StAt = 0;				// value of the rotary switch
+
+	wiringPiSetup();
+	pinMode(22, OUTPUT);
+	pinMode(23, OUTPUT);
+	pinMode(3,OUTPUT);	// tube HV suply
+	pinMode(2,OUTPUT);	// Neions
+	pinMode(5,INPUT);
+
+	digitalWrite(3, 0);
+	digitalWrite(2, 0);
+	digitalWrite(23, LOW);
+	digitalWrite(22, LOW);
+
+	wiringPiI2CWriteReg8(fd, 0x00, 0x00);		// set port A on chip 1 as all outputs
+	wiringPiI2CWriteReg8(fd, 0x01, 0x00);		// set port B on chip 1 as all ouptuts
+
+	wiringPiI2CWriteReg8(bd, 0x00, 0x00);		// set port A on the 2nd chip as all ouptuts
+	wiringPiI2CWriteReg8(bd, 0x01, 0x00);		// set port B on the 2nd chip as all outputs, may need to change soon
+
+	wiringPiI2CWriteReg8(fd, 0x13, 0x88);		// set all the tubes to show 0
+	wiringPiI2CWriteReg8(fd, 0x14, 0x21);
+	wiringPiI2CWriteReg8(bd, 0x13, 0x80);
+	wiringPiI2CWriteReg8(bd, 0x14, 0x11);
+
+	displayWeb = 0;
+
+// wread i2c switch here and set bits from it.
+	while ((opt = getopt(argc, argv, "tw")) != -1) {
+
+if(GET_GPIO(22)
+	{
+		digitalWrite(3, HIGH);
+		digitlalWrite(2, HIGH);
+	}
+		switch (opt) {
+
+			case 't': { 
+						displayWeb = 0;
+						usePM = 1; 
+						printf("Using 12 Hour Mode\n"); 
+						break; 
+					}
+			case 'w': { 
+						displayWeb = 1;
+						printf("Displaying web download speed\n"); 
+						break; 
+					}
+			default: {
+					exit(EXIT_FAILURE);
+				}
+
+      }
+
+	}
+
+	if(displayWeb == 0){
+		digitalWrite(2, 1);	// turn off neons
+		// read i2c port for switch
+		 while(1)
+
+// read switch for neions and hv.
+
+			{
+
+			current_time = time(NULL);
+
+			tm_p = localtime( &current_time );
+			gettimeofday(&tv, NULL);
+
+			if (current_time == ((time_t)-1)){
+					fprintf(stderr, "Failure to obtain the current time.\n");
+					exit(EXIT_FAILURE);
+			}
+
+			millisec = lrint(tv.tv_usec/100000.0); // Round to nearest millisec
+			if (millisec>=999) { // Allow for rounding up to nearest second
+				millisec -=999;
+				tv.tv_sec++;
+			}
+
+			if(millisec == 10){
+
+				millisec = 0;
+
+			}
+
+
+			char hours = 0;
+
+			if(usePM == 0){
+
+				hours = caculateTime(tm_p->tm_hour, hoursBits);
+
+			} else {
+
+				int hour = tm_p->tm_hour;
+
+				if(hour > 12){
+					hour = hour - 12;
+					digitalWrite(23, HIGH);
+					digitalWrite(22, LOW);
+				} else if(hour == 12){
+					digitalWrite(23, HIGH);
+					digitalWrite(22, LOW);
+				} else {
+
+					digitalWrite(23, LOW);
+					digitalWrite(22, HIGH);
+
+				}
+
+				hours = caculateTime(hour, hoursBits);
+
+			}
+
+			char mins = caculateTime(tm_p->tm_min, minitsBits);
+			char sec = caculateTime(tm_p->tm_sec, secondsBits);
+
+			if(prevSec != sec){
+
+				if(neon == 0){
+
+					neon = 1;
+
+				} else {
+
+					neon = 0;
+
+				}
+
+			}
+
+			digitalWrite(2, neon);
+
+			prevSec = sec;
+
+			char msec = caculateTime(millisec, miliseconds);
+
+			if(wiringPiI2CWriteReg8(fd, 0x13, hours) == -1){
+
+				printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
+
+			}
+
+			if(wiringPiI2CWriteReg8(fd, 0x14, mins) == -1){
+
+				printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
+
+			}
+
+			if(wiringPiI2CWriteReg8(bd, 0x14, (((sec >> 4) & 0x0F) | ((msec) & 0xF0))) == -1){
+
+				printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
+
+			}
+
+			if(wiringPiI2CWriteReg8(bd, 0x13, ((sec & 0x0F) << 4)) == -1){
+
+				printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
+
+			}
+
+		}
+
+	}  else {
+
+		FILE* file;
+
+		Py_SetProgramName("speedtest.py");
+		Py_Initialize();
+		file = fopen("speedtest.py","r");
+		PyRun_SimpleFile(file, "speedtest.py");
+		Py_Finalize();
+		
+		printf("Speed Caculated\n");
+//	display animation on the tubes here
+		FILE *fp;
+// posibly scroll the first result
+		fp = fopen("speed.txt","r");
+// display the 2 results an animate
+		if( fp == NULL )
+		{
+			perror("Error while opening the file.\n");
+			exit(EXIT_FAILURE);
+		}
+		
+		size_t buffer_size = 80;
+		char *buffer = malloc(buffer_size * sizeof(char));
+		
+		int lineNumber = 0;
+		while(-1 != getline(&buffer, &buffer_size, fp))
+		{
+			
+			switch(lineNumber){
+				
+				case 0: {
+					
+					int pingSpeed = (int)atof(buffer);
+					
+					int length = 3;
+					
+					int i, j;
+					
+					char pingFirst, pingSec;
+					
+					for(i = 1; i < 4 ; i++){
+
+						switch(i){
+							
+							case 1 : {
+								
+								pingFirst = caculateTime((pingSpeed) % 10, miliseconds);
+								break;
+								
+							}
+							
+							case 2 : {
+								
+								j = (pingSpeed / 10) % 10;
+								break;
+								
+							}
+							
+							case 3: {
+								
+								int last = (pingSpeed / 100) % 10;
+								j = j + (last * 10);
+								
+								pingSec = caculateTime(j, secondsBits);
+								break;
+								
+							}
+							
+						}
+						
+						
+					}
+					
+					if(wiringPiI2CWriteReg8(bd, 0x14, (((pingSec >> 4) & 0x0F) | ((pingFirst) & 0xF0))) == -1){
+
+						printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
+
+					}
+			
+					if(wiringPiI2CWriteReg8(bd, 0x13, ((pingSec & 0x0F) << 4)) == -1){
+
+						printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
+
+					}
+					
+					
+					break;
+					
+				}
+				
+				case 1: {
+					
+					float downloadSpeed = atof(buffer);
+//					printf("%f\n", downloadSpeed);
+					
+					if(downloadSpeed < 100){
+						
+						char down = caculateTime((int)downloadSpeed, hoursBits);
+					
+						if(wiringPiI2CWriteReg8(fd, 0x13, down) == -1){
+
+							printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
+
+						}
+						
+					}
+					
+					break;
+					
+				}
+				
+				case 2: {
+					
+					float uploadSpeed = atof(buffer);
+//					printf("%f\n", uploadSpeed);
+					
+					if(uploadSpeed < 100){
+						
+						char up = caculateTime((int)uploadSpeed, minitsBits);
+					
+						if(wiringPiI2CWriteReg8(fd, 0x14, up) == -1){
+
+							printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
+
+						}
+						
+					}
+					
+					break;
+					
+				}
+				
+			}
+			
+			lineNumber++;
+			
+		}
+			//		animat the results by flashing ? and repeat it again.
+		
+		fclose(fp);
+		
+	}
+}
+
+char caculateTime(int number, char map[2][10]){
+
+	if(number > 9){
+
+		char out = (map[1][number % 10] << 4) & 0xFF;
+		out = out | map[0][(number / 10) % 10];
+
+		return out;
+
+	} else {
+
+		char out = (map[1][number] << 4) & 0xFF;
+
+		out = out | map[0][0];
+		
+		return out;
+
+	}
+	
+}
