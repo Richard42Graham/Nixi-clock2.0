@@ -13,6 +13,43 @@
 #include "main.h"
 #include "speedtest.h"
 
+void SpeedTest(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip);
+int SpeedTestEnter(void* d);
+int SpeedTestUpdate(void* d);
+int SpeedTestExit(void* d);
+
+struct Nixi_State SpeedTestState(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip)
+{
+	struct SpeedTestData *data = malloc(sizeof(struct SpeedTestData));
+	data->hoursAndMinutesChip = hoursAndMinutesChip;
+	data->secondsAndMicrosecondsAndModeChip = secondsAndMicrosecondsAndModeChip;
+
+	struct Nixi_State speedTestState;
+	speedTestState.Enter = &SpeedTestEnter;
+	speedTestState.Update = &SpeedTestUpdate;
+	speedTestState.Exit = &SpeedTestExit;
+	speedTestState.Data = (void*)data;
+	return speedTestState;
+}
+
+int SpeedTestEnter(void* d)
+{
+	return 0;
+}
+
+int SpeedTestUpdate(void* d)
+{
+	struct SpeedTestData* data = (struct SpeedTestData*)d;
+	SpeedTest(
+		data->hoursAndMinutesChip,
+		data->secondsAndMicrosecondsAndModeChip);
+	return 0;
+}
+
+int SpeedTestExit(void* d)
+{
+	return 0;
+}
 
 void SpeedTest(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip)
 {

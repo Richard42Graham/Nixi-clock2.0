@@ -39,6 +39,7 @@ const int secondsAndMicrosecondsAndModeChipAddress = 0x21;
 const int chipPortA = 0x13;
 const int chipPortB = 0x14;
 
+void DisplayNumber(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip, int number);
 
 int main(int argc, char *argv[]) {
 
@@ -49,8 +50,12 @@ int main(int argc, char *argv[]) {
 	int secondsAndMicrosecondsAndModeChip = wiringPiI2CSetup(secondsAndMicrosecondsAndModeChipAddress);
 	Initialize();
 
-	int neonBlinkOrientation = GetNeonBlinkOrientation();
+	struct Nixi_State clock12HState = CreateClockState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
+	struct Nixi_State clock24HState = CreateClockState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 1);
 
+	struct Nixi_State currentState = clock12HState;
+	currentState.Enter(currentState.Data);
+	char lastMode = 0x00;
 	while (1)
 	{
 		// sleep for 50 milliSeconds
@@ -74,36 +79,65 @@ int main(int argc, char *argv[]) {
 		// Turn on high voltage power supply
 		digitalWrite(highVoltagePowerSupply, LOW);
 
+		currentState.Update(currentState.Data);
 
 		char modeSwitch = (wiringPiI2CReadReg8(secondsAndMicrosecondsAndModeChip, chipPortA) & 0x0F);
+		if (lastMode != modeSwitch)
+		{
+			lastMode = modeSwitch;
+			currentState.Exit(currentState.Data);
 
-		switch (modeSwitch) {
-		case 0x00:
-		{
-			DisplayTime(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0, neonBlinkOrientation);
-			break;
+			switch (modeSwitch) {
+			case 0x00:
+			{
+				currentState = clock12HState;
+				break;
+			}
+			case 0x01:
+			{
+				currentState = clock24HState;
+				break;
+			}
+			case 0x02:
+			{
+				DisplayNumber(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
+				break;
+			}
+			case 0x04:
+			{
+				DisplayNumber(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
+				break;
+			}
+			case 0x08:
+			{
+				SpeedTest(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip);
+				break;
+			}
+			}
+			currentState.Enter(currentState.Data);
 		}
-		case 0x01:
-		{
-			DisplayTime(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 1, neonBlinkOrientation);
-			break;
-		}
-		case 0x02:
-		{
-			DisplayNumber(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
-			break;
-		}
-		case 0x04:
-		{
-			DisplayNumber(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
-			break;
-		}
-		case 0x08:
-		{
-			SpeedTest(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip);
-			break;
-		}
-		}
+	}
+}
+
+void DisplayNumber(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip, int number)
+{
+	//Set all the tubes to show 0
+	wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortA, CaculateTime(number, hoursBits));
+	wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortB, CaculateTime(number, minutsBits));
+	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortA, CaculateTime(number, secondsBits));
+	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortB, CaculateTime(number, deciseconds));
+}
+
+char CaculateTime(int number, char map[2][10]) {
+	if (number > 9) {
+		char out = (map[1][number % 10] << 4) & 0xFF;
+		out = out | map[0][(number / 10) % 10];
+		return out;
+	}
+	else {
+		char out = (map[1][number] << 4) & 0xFF;
+		out = out | map[0][0];
+		return out;
 	}
 }
 

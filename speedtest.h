@@ -1,6 +1,12 @@
 #ifndef SPEEDTEST_H
 #define SPEEDTEST_H
 
-void SpeedTest(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip);
+#include "main.h"
+struct Nixi_State CreateSpeedTestState(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip);
+
+struct SpeedTestData {
+	int hoursAndMinutesChip;
+	int secondsAndMicrosecondsAndModeChip;
+};
 
 #endif /* SPEEDTEST_H */

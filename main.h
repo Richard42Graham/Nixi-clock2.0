@@ -22,6 +22,15 @@ extern const int secondsAndMicrosecondsAndModeChipAddress;
 extern const int chipPortA;
 extern const int chipPortB;
 
+//State struct
+struct Nixi_State {
+	int (*Enter)();
+	int (*Update)();
+	int (*Exit)();
+	void* Data;
+};
+
 void Initialize();
+char CaculateTime(int number, char map[2][10]);
 
 #endif /* MAIN_H */

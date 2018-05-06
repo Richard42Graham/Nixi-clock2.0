@@ -13,8 +13,64 @@
 #include "main.h"
 #include "clock.h"
 
+struct ClockData
+{
+	int hoursAndMinutesChip;
+	int secondsAndMicrosecondsAndModeChip;
+	int use24h;
+	int neonBlinkOrientation;
+};
+
+int ClockEnter(void* d);
+int ClockUpdate(void* d);
+int ClockExit(void* d);
+void DisplayTime(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip, int use24h, int neonBlinkOrientation);
+char GetHours(struct tm *tm_p, int use24h);
+char GetDecisecond(struct timeval tv);
+int GetNeonBlinkOrOrEven();
+
+struct Nixi_State CreateClockState(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip, int use24h)
+{
+	struct ClockData *data = malloc(sizeof(struct ClockData));
+	data->hoursAndMinutesChip = hoursAndMinutesChip;
+	data->secondsAndMicrosecondsAndModeChip = secondsAndMicrosecondsAndModeChip;
+	data->use24h = use24h;
+	data->neonBlinkOrientation = GetNeonBlinkOrOrEven();
+
+	struct Nixi_State clockState;
+	clockState.Enter = &ClockEnter;
+	clockState.Update = &ClockUpdate;
+	clockState.Exit = &ClockExit;
+	clockState.Data = (void*) data;
+	return clockState;
+}
+
+int ClockEnter(void* d)
+{
+	struct ClockData* data = (struct ClockData*)d;
+	data->neonBlinkOrientation = GetNeonBlinkOrOrEven();
+	return 0;
+}
+
+int ClockUpdate(void* d)
+{
+	struct ClockData* data = (struct ClockData*)d;
+	DisplayTime(
+		data->hoursAndMinutesChip, 
+		data->secondsAndMicrosecondsAndModeChip, 
+		data->use24h, 
+		data->neonBlinkOrientation);
+
+	return 0;
+}
+
+int ClockExit(void* d)
+{
+	return 0;
+}
+
 //Gay vs straight
-int GetNeonBlinkOrientation() {
+int GetNeonBlinkOrOrEven() {
 	struct tm *tm_p;
 	time_t current_time;
 	struct timeval tv;
@@ -125,26 +181,4 @@ char GetHours(struct tm *tm_p, int use24h) {
 		}
 	}
 	return CaculateTime(hour, hoursBits);
-}
-
-char CaculateTime(int number, char map[2][10]) {
-	if (number > 9) {
-		char out = (map[1][number % 10] << 4) & 0xFF;
-		out = out | map[0][(number / 10) % 10];
-		return out;
-	}
-	else {
-		char out = (map[1][number] << 4) & 0xFF;
-		out = out | map[0][0];
-		return out;
-	}
-}
-
-void DisplayNumber(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip, int number)
-{
-	//Set all the tubes to show 0
-	wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortA, CaculateTime(number, hoursBits));
-	wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortB, CaculateTime(number, minutsBits));
-	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortA, CaculateTime(number, secondsBits));
-	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortB, CaculateTime(number, deciseconds));
 }
