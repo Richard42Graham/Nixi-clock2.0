@@ -43,9 +43,6 @@ const int chipPortB = 0x14;
 
 int main(int argc, char *argv[]) {
 
-	int bmi = CalculateBMI(age, height, weight);
-
-
 	// first chip
 	int hoursAndMinutesChip = wiringPiI2CSetup(hoursAndMinutesChipAddress);
 

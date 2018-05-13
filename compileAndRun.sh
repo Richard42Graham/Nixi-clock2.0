@@ -1,6 +1,6 @@
 #!/bin/bash
 echo Compiling...
-gcc -o main.out main.c speedtest.c initialize.c clock.c placeHolder.c -lm -lwiringPi $(/usr/bin/python2.7-config --ldflags)
+gcc -o main.out main.c speedtest.c initialize.c clock.c placeHolderState.c -lm -lwiringPi $(/usr/bin/python2.7-config --ldflags)
 
 if [ $? -eq 0 ]
 then
