@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 	struct Nixi_State clock24HState = CreateClockState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 1);
 	struct Nixi_State speedTestState = CreateSpeedTestState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip);
 	struct Nixi_State placeHolderState = CreatePlaceHolderState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
-	struct Nixi_State placeHolder2State = CreatePlaceHolderState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 2);
+	struct Nixi_State placeHolder2State = CreatePlaceHolderState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 42);
 	
 	struct Nixi_State currentState = clock12HState;
 	currentState.Enter(currentState.Data);
@@ -129,8 +129,8 @@ void DisplayNumber(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChi
 	wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortB, CaculateTime(number, minutsBits));
 	char decisec =  CaculateTime(number, deciseconds);
 	char sec =  CaculateTime(number, secondsBits);
-	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortA, ((sec & 0x0F) << 4)) );
-	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortB, (((sec >> 4) & 0x0F) | ((decisec) & 0xF0))));
+	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortA, (sec & 0x0F) << 4);
+	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortB, ((sec >> 4) & 0x0F) | (decisec & 0xF0));
 }
 
 char CaculateTime(int number, char map[2][10]) {
