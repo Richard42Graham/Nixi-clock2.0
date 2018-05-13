@@ -16,6 +16,10 @@ struct PlaceHolderData {
 	int numberToDisplay;
 };
 
+int PlaceHolderEnter(void* d);
+int PlaceHolderUpdate(void* d);
+int PlaceHolderExit(void* d);
+
 struct Nixi_State CreatePlaceHolderState(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip, int numberToDisplay)
 {
 	struct PlaceHolderData *data = malloc(sizeof(struct PlaceHolderData));
