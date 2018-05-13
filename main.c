@@ -6,7 +6,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <math.h>
-#include <python2.7/Python.h>
 #include <unistd.h>
 #include <string.h>
 
@@ -128,7 +127,7 @@ void DisplayNumber(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChi
 	//Set all the tubes to show 0
 	wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortA, CaculateTime(number, hoursBits));
 	wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortB, CaculateTime(number, minutsBits));
-	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortA, CaculateTime(number, secondsBits >> 4) & 0x0F);
+	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortA, CaculateTime(number, secondsBits);
 	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortB, CaculateTime(number, deciseconds));
 }
 
