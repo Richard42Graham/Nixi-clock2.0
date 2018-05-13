@@ -127,8 +127,10 @@ void DisplayNumber(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChi
 	//Set all the tubes to show 0
 	wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortA, CaculateTime(number, hoursBits));
 	wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortB, CaculateTime(number, minutsBits));
-	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortA, CaculateTime(number, deciseconds));
-	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortB, CaculateTime(number, secondsBits));
+	char decisec =  CaculateTime(number, deciseconds);
+	char sec =  CaculateTime(number, secondsBits);
+	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortA, ((sec & 0x0F) << 4)) );
+	wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortB, (((sec >> 4) & 0x0F) | ((decisec) & 0xF0))));
 }
 
 char CaculateTime(int number, char map[2][10]) {

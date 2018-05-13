@@ -124,11 +124,11 @@ void SpeedTest(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip)
 				}
 			}
 
-			if (wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, 0x14, (((pingSec >> 4) & 0x0F) | ((pingFirst) & 0xF0))) == -1) {
+			if (wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortB, (((pingSec >> 4) & 0x0F) | ((pingFirst) & 0xF0))) == -1) {
 				printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
 			}
 
-			if (wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, 0x13, ((pingSec & 0x0F) << 4)) == -1) {
+			if (wiringPiI2CWriteReg8(secondsAndMicrosecondsAndModeChip, chipPortA, ((pingSec & 0x0F) << 4)) == -1) {
 				printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
 			}
 			break;
@@ -138,7 +138,7 @@ void SpeedTest(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip)
 			//                                      printf("%f\n", downloadSpeed);
 			if (downloadSpeed < 100) {
 				char down = CaculateTime((int)downloadSpeed, hoursBits);
-				if (wiringPiI2CWriteReg8(hoursAndMinutesChip, 0x13, down) == -1) {
+				if (wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortA, down) == -1) {
 					printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
 				}
 			}
@@ -149,7 +149,7 @@ void SpeedTest(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip)
 			//                                      printf("%f\n", uploadSpeed);
 			if (uploadSpeed < 100) {
 				char up = CaculateTime((int)uploadSpeed, minutsBits);
-				if (wiringPiI2CWriteReg8(hoursAndMinutesChip, 0x14, up) == -1) {
+				if (wiringPiI2CWriteReg8(hoursAndMinutesChip, chipPortB, up) == -1) {
 					printf("Oh dear, something went wrong with write()! %s\n", strerror(errno));
 				}
 			}
