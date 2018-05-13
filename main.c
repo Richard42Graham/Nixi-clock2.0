@@ -13,6 +13,7 @@
 #include "main.h"
 #include "speedtest.h"
 #include "clock.h"
+#include "placeHolderState.h"
 
 // hours                                                // first digit                                          // second digit
 char hoursBits[2][10] = { {0x00, 0x08, 0x04, 0x0C, 0x02, 0x0A, 0x06, 0x0E, 0x01, 0x09}, {0x00, 0x08, 0x04, 0x0C, 0x02, 0x0A, 0x06, 0x0E, 0x01, 0x09} };
@@ -39,20 +40,26 @@ const int secondsAndMicrosecondsAndModeChipAddress = 0x21;
 const int chipPortA = 0x13;
 const int chipPortB = 0x14;
 
-void DisplayNumber(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip, int number);
 
 int main(int argc, char *argv[]) {
+
+	int bmi = CalculateBMI(age, height, weight);
+
 
 	// first chip
 	int hoursAndMinutesChip = wiringPiI2CSetup(hoursAndMinutesChipAddress);
 
 	// Second Chip
 	int secondsAndMicrosecondsAndModeChip = wiringPiI2CSetup(secondsAndMicrosecondsAndModeChipAddress);
+
 	Initialize();
 
 	struct Nixi_State clock12HState = CreateClockState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
 	struct Nixi_State clock24HState = CreateClockState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 1);
-
+	struct Nixi_State speedTestState = CreateSpeedTestState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip);
+	struct Nixi_State placeHolderState = CreatePlaceHolderState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
+	struct Nixi_State placeHolder2State = CreatePlaceHolderState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 2);
+	
 	struct Nixi_State currentState = clock12HState;
 	currentState.Enter(currentState.Data);
 	char lastMode = 0x00;
@@ -100,17 +107,17 @@ int main(int argc, char *argv[]) {
 			}
 			case 0x02:
 			{
-				DisplayNumber(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
+				currentState = placeHolderState;
 				break;
 			}
 			case 0x04:
 			{
-				DisplayNumber(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
+				currentState = placeHolder2State;
 				break;
 			}
 			case 0x08:
 			{
-				SpeedTest(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip);
+				currentState = speedTestState;
 				break;
 			}
 			}
@@ -140,4 +147,7 @@ char CaculateTime(int number, char map[2][10]) {
 		return out;
 	}
 }
+
+
+
 

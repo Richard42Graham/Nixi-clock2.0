@@ -4,9 +4,5 @@
 #include "main.h"
 struct Nixi_State CreateSpeedTestState(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip);
 
-struct SpeedTestData {
-	int hoursAndMinutesChip;
-	int secondsAndMicrosecondsAndModeChip;
-};
 
 #endif /* SPEEDTEST_H */
