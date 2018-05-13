@@ -41,6 +41,9 @@ struct Nixi_State CreateSpeedTestState(int hoursAndMinutesChip, int secondsAndMi
 int SpeedTestEnter(void* d)
 {
 	struct SpeedTestData* data = (struct SpeedTestData*)d;
+	DisplayNumber(data->hoursAndMinutesChip,
+		data->secondsAndMicrosecondsAndModeChip,
+		9);
 	SpeedTest(
 		data->hoursAndMinutesChip,
 		data->secondsAndMicrosecondsAndModeChip);
