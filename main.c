@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 	struct Nixi_State speedTestState = CreateSpeedTestState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip);
 	struct Nixi_State placeHolderState = CreatePlaceHolderState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
 	struct Nixi_State placeHolder2State = CreatePlaceHolderState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 42);
-	
+
 	struct Nixi_State currentState = clock12HState;
 	currentState.Enter(currentState.Data);
 	char lastMode = 0x00;
@@ -145,7 +145,3 @@ char CaculateTime(int number, char map[2][10]) {
 		return out;
 	}
 }
-
-
-
-

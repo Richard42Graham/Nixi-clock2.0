@@ -45,11 +45,11 @@ struct Nixi_State CreateClockState(int hoursAndMinutesChip, int secondsAndMicros
 	return clockState;
 }
 
-int ClockEnter(void* d)
+int ClockEnter(void* d)									// Function that runs at the start of the state of "clock"
 {
 	struct ClockData* data = (struct ClockData*)d;
-	data->neonBlinkOrientation = GetNeonBlinkOrOrEven();
-	return 0;
+	data->neonBlinkOrientation = GetNeonBlinkOrOrEven();				// chose if neon is on or off.
+	return 0;									// exit status condition
 }
 
 int ClockUpdate(void* d)
@@ -70,7 +70,7 @@ int ClockExit(void* d)
 }
 
 //Gay vs straight
-int GetNeonBlinkOrOrEven() {
+int GetNeonBlinkOrOrEven() {								// chose weathere the neons are on for odd or even numbers of seconds
 	struct tm *tm_p;
 	time_t current_time;
 	struct timeval tv;
@@ -104,13 +104,14 @@ void DisplayTime(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip,
 	char sec = CaculateTime(tm_p->tm_sec, secondsBits);
 	char decisec = GetDecisecond(tv);
 	int enableNeons = 0;
-	if (tm_p->tm_sec % 2 == neonBlinkOrientation)
+	if (tm_p->tm_sec % 2 == neonBlinkOrientation && tm_p->tm_hour < 12 )	// only blink during the day. or most of the time
 	{
-		enableNeons = HIGH;
+ 		enableNeons = HIGH;					// turn neion lights off!
+//		enableNeons = LOW;
 	}
 	else
 	{
-		enableNeons = LOW;
+		enableNeons = LOW;					// turn neion lights on
 	}
 
 	//AM / PM leds

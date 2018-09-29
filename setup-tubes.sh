@@ -40,4 +40,4 @@ i2cset -y 1 0x21 0x14 0x11 # port B
 # echo " running clock program"
 
 # cd ~/C-code
-/home/pi/C-code/a.out
+/home/pi/clocky/main.out
