@@ -62,7 +62,8 @@ int main(int argc, char *argv[]) {
 	while (1)
 	{
 		// sleep for 50 milliSeconds
-		usleep(100 * 500);
+//		usleep(100 * 500);
+//sleep(100);
 
 		// Show no light if switch is pressed 
 		if (digitalRead(onOffSwitch) == HIGH)
