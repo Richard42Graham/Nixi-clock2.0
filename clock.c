@@ -129,7 +129,7 @@ void DisplayTime(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip,
 		digitalWrite(pmLed, HIGH);
 	}
 
-	//Neons 
+	//Neons
 	digitalWrite(neons, enableNeons);
 
 	//Hours
@@ -161,7 +161,6 @@ void DisplayTime(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip,
 char GetDecisecond(struct timeval tv) {
 	// Round to nearest decisecond
 	int decisecond = lrint(tv.tv_usec / 100000.0);
-
 	// Allow for rounding up to nearest second
 	if (decisecond >= 999) {
 		decisecond -= 999;

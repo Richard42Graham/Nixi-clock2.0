@@ -24,8 +24,8 @@ char minutsBits[2][10] = { {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
 //Sec
 char secondsBits[2][10] = { {0x00, 0x08, 0x04, 0x0C, 0x02, 0x0A, 0x06, 0x0E, 0x01, 0x09},{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09} };
 
-//decisecond                                          10th's of a second                               not used, 4 bit mode switch here.
-char deciseconds[2][10] = { {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09}, {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
+//decisecond                              not used, 4 bit mode switch here                                        10th's of a second
+char deciseconds[2][10] = { {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09} };
 
 const int onOffSwitch = 21;
 const int amLed = 23;
@@ -42,6 +42,7 @@ const int chipPortB = 0x14;
 
 int main(int argc, char *argv[]) {
 
+	printf("We are live!\n");
 	// first chip
 	int hoursAndMinutesChip = wiringPiI2CSetup(hoursAndMinutesChipAddress);
 
@@ -56,17 +57,17 @@ int main(int argc, char *argv[]) {
 	struct Nixi_State placeHolderState = CreatePlaceHolderState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 0);
 	struct Nixi_State placeHolder2State = CreatePlaceHolderState(hoursAndMinutesChip, secondsAndMicrosecondsAndModeChip, 42);
 
-	struct Nixi_State currentState = clock12HState;
+	struct Nixi_State currentState = clock24HState;
 	currentState.Enter(currentState.Data);
 	char lastMode = 0x00;
 	while (1)
 	{
 		// sleep for 50 milliSeconds
-//		usleep(100 * 500);
+		usleep(100 * 100);
 //sleep(100);
 
 		// Show no light if switch is pressed 
-		if (digitalRead(onOffSwitch) == HIGH)
+		if (digitalRead(onOffSwitch) == LOW)
 		{
 			// Turn off HV
 			digitalWrite(highVoltagePowerSupply, HIGH);
