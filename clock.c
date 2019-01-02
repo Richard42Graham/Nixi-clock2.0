@@ -104,14 +104,13 @@ void DisplayTime(int hoursAndMinutesChip, int secondsAndMicrosecondsAndModeChip,
 	char sec = CaculateTime(tm_p->tm_sec, secondsBits);
 	char decisec = GetDecisecond(tv);
 	int enableNeons = 0;
-	if (tm_p->tm_sec % 2 == neonBlinkOrientation && tm_p->tm_hour < 12 )	// only blink during the day. or most of the time
+	if (tm_p->tm_sec % 2 == neonBlinkOrientation && tm_p->tm_hour < 6 && tm_p->tm_hour > 23 )	// only blink during the day. or most of the time
 	{
- 		enableNeons = HIGH;					// turn neion lights off!
-//		enableNeons = LOW;
+ 		enableNeons = LOW;					// turn neion lights off!
 	}
 	else
 	{
-		enableNeons = LOW;					// turn neion lights on
+		enableNeons = HIGH;					// turn neion lights on
 	}
 
 	//AM / PM leds

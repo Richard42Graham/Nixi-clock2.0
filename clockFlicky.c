@@ -14,10 +14,10 @@
 #include "clockFlicky.h"
 
 int minimumEffectLength = 5;		// in ms (milli seconds)	MIN
-int maximumEffectLength = 30;		// in ms 			MAX
+int maximumEffectLength = 20;		// in ms 			MAX
 
 int minimumTimeToNextEffect = 1000;
-int maximumTimeToNextEffect = 10000;
+int maximumTimeToNextEffect = 20000;
 
 struct ClockFlickyData
 {
@@ -92,8 +92,8 @@ int ClockFlickyUpdate(void* d)
 				usleep(7 * 1000);
 				digitalWrite(highVoltagePowerSupply, LOW);
 				usleep(7 * 1000);
-				printf("%i", N);
-				printf("wee");
+//				printf("%i", N);
+//				printf("wee");
 
 		DisplayFlickyTime(
 			data->hoursAndMinutesChip, 
@@ -167,7 +167,7 @@ void DisplayFlickyTime(int hoursAndMinutesChip, int secondsAndMicrosecondsAndMod
 	char sec = CaculateTime(tm_p->tm_sec, secondsBits);
 	char decisec = GetFlickyDecisecond(tv);
 	int enableNeons = 0;
-	if (tm_p->tm_sec % 2 == neonBlinkOrientation && tm_p->tm_hour < 12 )	// only blink during the day. or most of the time
+	if (tm_p->tm_sec % 2 == neonBlinkOrientation)	// only blink during the day. or most of the time
 	{
  		enableNeons = HIGH;					// turn neion lights off!
 //		enableNeons = LOW;
