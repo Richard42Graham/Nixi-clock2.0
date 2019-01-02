@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 		usleep(100 * 100);
 //sleep(100);
 
-		// Show no light if switch is pressed 
+		// Show no light if switch is pressed
 		if (digitalRead(onOffSwitch) == LOW)
 		{
 			// Turn off HV
